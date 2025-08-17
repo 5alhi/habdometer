@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هبدوميتر - Habdometer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <header class="header" id="mainHeader">
+            <div class="title-section">
+                <h1 class="arabic-title">هبدوميتر</h1>
+                <h2 class="english-title">Habdometer</h2>
+            </div>
+            <div class="header-controls">
+                <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content" id="mainContent">
+            <div class="controls-panel" id="controlsPanel">
+                <div class="control-group">
+                    <label for="gaugeType">نوع المقياس / Gauge Type</label>
+                    <select id="gaugeType">
+                        <option value="angular">Angular Gauge</option>
+                        <option value="semicircle">Semi-Circle Gauge</option>
+                        <option value="quarter">Quarter Circle Gauge</option>
+                        <option value="linear">Linear Gauge</option>
+                        <option value="speedometer">Speedometer</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="gaugeValue">قيمة المقياس / Gauge Value</label>
+                    <input type="number" id="gaugeValue" min="0" max="100" value="50" step="1">
+                    <input type="range" id="gaugeSlider" min="0" max="100" value="50" step="1">
+                </div>
+
+                <div class="control-group">
+                    <label for="gaugeName">اسم المقياس / Gauge Name</label>
+                    <input type="text" id="gaugeName" value="هبدوميتر" placeholder="Enter gauge name">
+                </div>
+
+                <div class="control-group">
+                    <label for="minValue">القيمة الدنيا / Min Value</label>
+                    <input type="number" id="minValue" value="0" step="1">
+                </div>
+
+                <div class="control-group">
+                    <label for="maxValue">القيمة العليا / Max Value</label>
+                    <input type="number" id="maxValue" value="100" step="1">
+                </div>
+
+                <div class="control-group">
+                    <label for="units">الوحدة / Units</label>
+                    <input type="text" id="units" value="%" placeholder="e.g., °C, %, RPM">
+                </div>
+
+                <div class="control-group">
+                    <label for="gaugeSize">حجم المقياس / Gauge Size</label>
+                    <input type="range" id="gaugeSize" min="200" max="600" value="400" step="50">
+                    <span id="gaugeSizeDisplay">400px</span>
+                </div>
+
+                <div class="control-group">
+                    <label for="backgroundColor">لون الخلفية / Background Color</label>
+                    <div class="color-input-group">
+                        <input type="color" id="backgroundColor" value="#1a1a1a">
+                        <input type="text" id="backgroundColorText" value="#1a1a1a" placeholder="#000000">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>خلفيات جاهزة / Preset Backgrounds</label>
+                    <div class="preset-colors">
+                        <button class="preset-color active" data-color="#1a1a1a" style="background: #1a1a1a"></button>
+                        <button class="preset-color" data-color="#2c3e50" style="background: #2c3e50"></button>
+                        <button class="preset-color" data-color="#34495e" style="background: #34495e"></button>
+                        <button class="preset-color" data-color="#ffffff" style="background: #ffffff"></button>
+                        <button class="preset-color" data-color="#ecf0f1" style="background: #ecf0f1"></button>
+                        <button class="preset-color" data-color="#8e44ad" style="background: #8e44ad"></button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>إعدادات سريعة / Quick Settings</label>
+                    <div class="quick-settings">
+                        <button class="quick-btn" data-preset="temperature">حرارة / Temp</button>
+                        <button class="quick-btn" data-preset="speed">سرعة / Speed</button>
+                        <button class="quick-btn" data-preset="pressure">ضغط / Pressure</button>
+                        <button class="quick-btn" data-preset="battery">بطارية / Battery</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gauge-container" id="gaugeContainer">
+                <div class="gauge-wrapper" id="gaugeWrapper">
+                    <canvas id="gaugeCanvas" width="400" height="400"></canvas>
+                    <div class="resize-handles" id="resizeHandles">
+                        <div class="resize-handle resize-handle-nw"></div>
+                        <div class="resize-handle resize-handle-ne"></div>
+                        <div class="resize-handle resize-handle-sw"></div>
+                        <div class="resize-handle resize-handle-se"></div>
+                    </div>
+                </div>
+                <div class="gauge-info" id="gaugeInfo">
+                    <div class="current-value" id="currentValueDisplay">50</div>
+                    <div class="gauge-title" id="gaugeTitleDisplay">هبدوميتر</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen-only mode overlay -->
+        <div class="fullscreen-overlay" id="fullscreenOverlay">
+            <div class="fullscreen-gauge-container">
+                <canvas id="fullscreenCanvas" width="600" height="600"></canvas>
+                <div class="fullscreen-info">
+                    <div class="fullscreen-value" id="fullscreenValueDisplay">50</div>
+                    <div class="fullscreen-title" id="fullscreenTitleDisplay">هبدوميتر</div>
+                </div>
+            </div>
+            <button class="exit-fullscreen-btn" id="exitFullscreenBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
