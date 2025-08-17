@@ -5,17 +5,17 @@
 }
 
 body {
-    font-family: 'Cairo', 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
     transition: all 0.3s ease;
-    direction: rtl;
+    direction: ltr;
 }
 
-/* Arabic and bilingual text support */
-.arabic-title {
-    font-family: 'Cairo', sans-serif;
+/* Main title styling */
+.main-title {
+    font-family: 'Inter', sans-serif;
     font-size: 2.5rem;
     font-weight: 700;
     color: white;
@@ -23,13 +23,12 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.english-title {
-    font-family: 'Roboto', sans-serif;
+.subtitle {
+    font-family: 'Inter', sans-serif;
     font-size: 1.2rem;
     font-weight: 300;
     color: rgba(255, 255, 255, 0.8);
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .container {
@@ -54,7 +53,7 @@ body {
 }
 
 .title-section {
-    text-align: right;
+    text-align: left;
 }
 
 .header-controls {
@@ -109,8 +108,7 @@ body {
     font-weight: 600;
     color: #2c3e50;
     font-size: 0.9rem;
-    text-align: right;
-    direction: rtl;
+    text-align: left;
 }
 
 .control-group input[type="number"],
@@ -295,7 +293,7 @@ body {
     border-radius: 8px;
     background: #f8f9fa;
     font-size: 0.9rem;
-    font-family: 'Courier New', monospace;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
     direction: ltr;
     text-align: left;
 }
@@ -324,7 +322,7 @@ body {
 }
 
 #gaugeSizeDisplay {
-    margin-right: 10px;
+    margin-left: 10px;
     font-weight: 600;
     color: #667eea;
 }
@@ -420,16 +418,15 @@ body {
     color: #2c3e50;
     margin-bottom: 10px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .gauge-title {
     font-size: 1.5rem;
     color: #7f8c8d;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-family: 'Cairo', sans-serif;
+    letter-spacing: 1px;
+    font-family: 'Inter', sans-serif;
 }
 
 /* Fullscreen overlay styles */
@@ -476,7 +473,7 @@ body {
     color: white;
     margin-bottom: 15px;
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .fullscreen-title {
@@ -484,7 +481,7 @@ body {
     color: rgba(255, 255, 255, 0.9);
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .exit-fullscreen-btn {
@@ -540,11 +537,11 @@ body {
         order: 1;
     }
     
-    .arabic-title {
+    .main-title {
         font-size: 2rem;
     }
     
-    .english-title {
+    .subtitle {
         font-size: 1rem;
     }
 }
@@ -566,11 +563,11 @@ body {
         text-align: center;
     }
     
-    .arabic-title {
+    .main-title {
         font-size: 1.8rem;
     }
     
-    .english-title {
+    .subtitle {
         font-size: 0.9rem;
     }
     

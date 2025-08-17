@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هبدوميتر - Habdometer</title>
+    <title>Habdometer - Professional Gauge Visualizer</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container" id="mainContainer">
         <header class="header" id="mainHeader">
             <div class="title-section">
-                <h1 class="arabic-title">هبدوميتر</h1>
-                <h2 class="english-title">Habdometer</h2>
+                <h1 class="main-title">Habdometer</h1>
+                <h2 class="subtitle">Professional Gauge Visualizer</h2>
             </div>
             <div class="header-controls">
                 <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
@@ -26,7 +33,7 @@
         <div class="main-content" id="mainContent">
             <div class="controls-panel" id="controlsPanel">
                 <div class="control-group">
-                    <label for="gaugeType">نوع المقياس / Gauge Type</label>
+                    <label for="gaugeType">Gauge Type</label>
                     <select id="gaugeType">
                         <option value="angular">Angular Gauge</option>
                         <option value="semicircle">Semi-Circle Gauge</option>
@@ -37,39 +44,39 @@
                 </div>
 
                 <div class="control-group">
-                    <label for="gaugeValue">قيمة المقياس / Gauge Value</label>
+                    <label for="gaugeValue">Gauge Value</label>
                     <input type="number" id="gaugeValue" min="0" max="100" value="50" step="1">
                     <input type="range" id="gaugeSlider" min="0" max="100" value="50" step="1">
                 </div>
 
                 <div class="control-group">
-                    <label for="gaugeName">اسم المقياس / Gauge Name</label>
-                    <input type="text" id="gaugeName" value="هبدوميتر" placeholder="Enter gauge name">
+                    <label for="gaugeName">Gauge Name</label>
+                    <input type="text" id="gaugeName" value="Habdometer" placeholder="Enter gauge name">
                 </div>
 
                 <div class="control-group">
-                    <label for="minValue">القيمة الدنيا / Min Value</label>
+                    <label for="minValue">Min Value</label>
                     <input type="number" id="minValue" value="0" step="1">
                 </div>
 
                 <div class="control-group">
-                    <label for="maxValue">القيمة العليا / Max Value</label>
+                    <label for="maxValue">Max Value</label>
                     <input type="number" id="maxValue" value="100" step="1">
                 </div>
 
                 <div class="control-group">
-                    <label for="units">الوحدة / Units</label>
+                    <label for="units">Units</label>
                     <input type="text" id="units" value="%" placeholder="e.g., °C, %, RPM">
                 </div>
 
                 <div class="control-group">
-                    <label for="gaugeSize">حجم المقياس / Gauge Size</label>
-                    <input type="range" id="gaugeSize" min="200" max="600" value="400" step="50">
+                    <label for="gaugeSize">Gauge Size</label>
+                    <input type="range" id="gaugeSize" min="200" max="800" value="400" step="50">
                     <span id="gaugeSizeDisplay">400px</span>
                 </div>
 
                 <div class="control-group">
-                    <label for="backgroundColor">لون الخلفية / Background Color</label>
+                    <label for="backgroundColor">Background Color</label>
                     <div class="color-input-group">
                         <input type="color" id="backgroundColor" value="#1a1a1a">
                         <input type="text" id="backgroundColorText" value="#1a1a1a" placeholder="#000000">
@@ -77,7 +84,7 @@
                 </div>
 
                 <div class="control-group">
-                    <label>خلفيات جاهزة / Preset Backgrounds</label>
+                    <label>Preset Backgrounds</label>
                     <div class="preset-colors">
                         <button class="preset-color active" data-color="#1a1a1a" style="background: #1a1a1a"></button>
                         <button class="preset-color" data-color="#2c3e50" style="background: #2c3e50"></button>
@@ -89,30 +96,30 @@
                 </div>
 
                 <div class="control-group">
-                    <label>إعدادات سريعة / Quick Settings</label>
+                    <label>Quick Settings</label>
                     <div class="quick-settings">
-                        <button class="quick-btn" data-preset="temperature">حرارة / Temp</button>
-                        <button class="quick-btn" data-preset="speed">سرعة / Speed</button>
-                        <button class="quick-btn" data-preset="pressure">ضغط / Pressure</button>
-                        <button class="quick-btn" data-preset="battery">بطارية / Battery</button>
+                        <button class="quick-btn" data-preset="temperature">Temperature</button>
+                        <button class="quick-btn" data-preset="speed">Speed</button>
+                        <button class="quick-btn" data-preset="pressure">Pressure</button>
+                        <button class="quick-btn" data-preset="battery">Battery</button>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <label>رابط مباشر / Direct Link</label>
+                    <label>Direct Link</label>
                     <div class="url-generator">
                         <button id="generateUrlBtn" class="generate-url-btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
                             </svg>
-                            إنشاء رابط / Generate URL
+                            Generate URL
                         </button>
                         <button id="generateFullscreenUrlBtn" class="generate-url-btn fullscreen-url">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                             </svg>
-                            رابط شاشة كاملة / Fullscreen URL
+                            Fullscreen URL
                         </button>
                     </div>
                     <div class="url-display" id="urlDisplay" style="display: none;">
@@ -139,7 +146,7 @@
                 </div>
                 <div class="gauge-info" id="gaugeInfo">
                     <div class="current-value" id="currentValueDisplay">50</div>
-                    <div class="gauge-title" id="gaugeTitleDisplay">هبدوميتر</div>
+                    <div class="gauge-title" id="gaugeTitleDisplay">Habdometer</div>
                 </div>
             </div>
         </div>
@@ -150,7 +157,7 @@
                 <canvas id="fullscreenCanvas" width="600" height="600"></canvas>
                 <div class="fullscreen-info">
                     <div class="fullscreen-value" id="fullscreenValueDisplay">50</div>
-                    <div class="fullscreen-title" id="fullscreenTitleDisplay">هبدوميتر</div>
+                    <div class="fullscreen-title" id="fullscreenTitleDisplay">Habdometer</div>
                 </div>
             </div>
             <button class="exit-fullscreen-btn" id="exitFullscreenBtn">
