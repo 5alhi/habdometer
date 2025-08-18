@@ -283,7 +283,6 @@ function initializeApp() {
 }
 
 function startJitter() {
-
     if (!jitterActive) return;
     const gaugeValue = document.getElementById('gaugeValue');
     const originalValue = parseFloat(gaugeValue.value);
@@ -292,21 +291,19 @@ function startJitter() {
     if (originalValue > threshold) {
         const jitterAmount = (Math.random() - 0.5) * 2;
         const displayValue = Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue));
-        redrawGaugeOnly(displayValue);
+        redrawGaugeOnly(displayValue); // <-- Pass jittered value
         setTimeout(startJitter, 50);
     } else {
         redrawGaugeOnly(originalValue);
-         jitterActive = false;
+        jitterActive = false;
     }
 }
 
-
-
 // Redraw only the gauge without triggering warning/jitter logic
-function redrawGaugeOnly() {
+function redrawGaugeOnly(displayValue) {
     const canvas = document.getElementById('gaugeCanvas');
     const ctx = canvas.getContext('2d');
-    const value = parseFloat(document.getElementById('gaugeValue').value);
+    const value = Math.round(displayValue !== undefined ? displayValue : parseFloat(document.getElementById('gaugeValue').value));
     const name = document.getElementById('gaugeName').value;
     const type = document.getElementById('gaugeType').value;
     const min = parseFloat(document.getElementById('minValue').value);
