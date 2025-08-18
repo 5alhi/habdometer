@@ -320,7 +320,7 @@ function redrawGaugeOnly(displayValue) {
     const min = parseFloat(document.getElementById('minValue').value);
     const max = parseFloat(document.getElementById('maxValue').value);
     const units = document.getElementById('units').value;
-    const percentage = Math.max(0, Math.min(1, (value - min) / (max - min)));
+    const percentage = Math.max(0, (value - min) / (max - min));
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
