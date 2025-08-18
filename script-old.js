@@ -261,11 +261,6 @@ function updateGauge() {
     if (fullscreenOverlay.classList.contains('active')) {
         updateFullscreenGauge();
     }
-    
-    // Continuous animation for jitter effect when over threshold
-    if (value > threshold) {
-        setTimeout(() => updateGauge(), 50); // 20 FPS for smooth jitter
-    }
 }
 
 function drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units) {
@@ -622,21 +617,8 @@ function drawCarNeedle(ctx, centerX, centerY, length, angle, gaugeRadius) {
     const needleWidth = Math.max(8, gaugeRadius * 0.02);
     const needleLength = length;
     
-    // Add jitter effect if over warning threshold
-    let jitteredAngle = angle;
-    const currentValue = parseFloat(document.getElementById('gaugeValue').value);
-    const threshold = parseFloat(document.getElementById('warningThreshold').value);
-    
-    if (currentValue > threshold) {
-        const overThreshold = currentValue - threshold;
-        const maxValue = parseFloat(document.getElementById('maxValue').value);
-        const jitterIntensity = Math.min(overThreshold / (maxValue - threshold), 1) * 0.1; // Max 0.1 radians
-        const jitterOffset = (Math.random() - 0.5) * jitterIntensity;
-        jitteredAngle = angle + jitterOffset;
-    }
-    
-    const tipX = centerX + Math.cos(jitteredAngle) * needleLength;
-    const tipY = centerY + Math.sin(jitteredAngle) * needleLength;
+    const tipX = centerX + Math.cos(angle) * needleLength;
+    const tipY = centerY + Math.sin(angle) * needleLength;
     
     // Draw needle shadow
     ctx.save();
@@ -787,21 +769,8 @@ function drawEnhancedNeedle(ctx, centerX, centerY, length, angle, gaugeRadius) {
     const needleWidth = Math.max(6, gaugeRadius * 0.015);
     const needleLength = length;
     
-    // Add jitter effect if over warning threshold
-    let jitteredAngle = angle;
-    const currentValue = parseFloat(document.getElementById('gaugeValue').value);
-    const threshold = parseFloat(document.getElementById('warningThreshold').value);
-    
-    if (currentValue > threshold) {
-        const overThreshold = currentValue - threshold;
-        const maxValue = parseFloat(document.getElementById('maxValue').value);
-        const jitterIntensity = Math.min(overThreshold / (maxValue - threshold), 1) * 0.1; // Max 0.1 radians
-        const jitterOffset = (Math.random() - 0.5) * jitterIntensity;
-        jitteredAngle = angle + jitterOffset;
-    }
-    
-    const tipX = centerX + Math.cos(jitteredAngle) * needleLength;
-    const tipY = centerY + Math.sin(jitteredAngle) * needleLength;
+    const tipX = centerX + Math.cos(angle) * needleLength;
+    const tipY = centerY + Math.sin(angle) * needleLength;
     
     // Draw needle shadow
     ctx.save();
@@ -1255,6 +1224,7 @@ window.addEventListener('resize', function() {
 // Timed warning system
 function showTimedWarning(warningElement, duration, interval) {
     // Show warning with fade in
+    warningElement.style.display = 'flex'; // Add this line 
     warningElement.classList.remove('fade-out');
     warningElement.classList.add('show');
     
