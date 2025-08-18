@@ -1,339 +1,170 @@
-# هبدوميتر - Habdometer
+# Habdometer - Professional Gauge Visualizer
 
-A professional, multilingual gauge visualization tool with Arabic branding and advanced features. Built with vanilla HTML, CSS, and JavaScript for maximum compatibility and performance.
+A beautiful, responsive gauge visualization application with multiple gauge types, 3D Apple-style design, and advanced features.
 
-## 🎯 Features
+## Features
 
-### Multiple Gauge Types
-- **Angular Gauge**: Classic 270-degree arc gauge
-- **Semi-Circle Gauge**: 180-degree half-circle display
-- **Quarter Circle Gauge**: 90-degree compact gauge
-- **Linear Gauge**: Horizontal bar-style gauge
-- **Speedometer**: Automotive-style gauge with extended arc
+### 🎯 Multiple Gauge Types
+- **Angular Gauge**: Arc around the bottom (proper speedometer-style arc)
+- **Semi-Circle Gauge**: Half-circle display
+- **Quarter Circle Gauge**: Quarter arc display
+- **Linear Gauge**: Horizontal bar gauge
+- **Speedometer**: Professional car odometer with chrome rings and digital display
 
-### 🌐 Bilingual Interface
-- **Arabic Primary**: هبدوميتر branding with RTL support
-- **English Secondary**: Full bilingual labels and interface
-- **Unicode Support**: Proper Arabic text rendering and fonts
+### 🎨 3D Apple-Style Design
+- Glass morphism effects with backdrop blur
+- Multi-layered shadows and depth
+- Smooth hover animations and transitions
+- Premium metallic finishes and gradients
+- Interactive 3D transforms
 
-### 🔗 Query String Support
-Automatically configure the gauge via URL parameters:
+### 🔧 Advanced Features
+- **Heat Level Colors**: Smooth green-to-red gradient based on value
+- **Query String Support**: Direct URL configuration
+- **Fullscreen Mode**: Clean presentation with all controls hidden
+- **Resizable Gauges**: Drag handles and size slider (200px - 800px)
+- **URL Generation**: Create shareable links with current settings
+- **Responsive Design**: Works on desktop, tablet, and mobile
+
+### ⚙️ Configuration Options
+- Gauge value with number input and slider
+- Custom gauge names (supports any language including Arabic)
+- Min/max value ranges
+- Units (°C, %, RPM, etc.)
+- Background colors with presets
+- Quick settings presets (Temperature, Speed, Pressure, Battery)
+
+## Usage
+
+### Basic Usage
+1. Open the application in your browser
+2. Select gauge type from dropdown
+3. Adjust value using input field or slider
+4. Customize name, range, and units as needed
+5. Use fullscreen mode for presentations
+
+### Query String Parameters
+Configure the gauge directly via URL parameters:
+
 ```
-?value=75&name=Temperature&units=°C&type=semicircle&min=0&max=100&bg=%23ffffff&fullscreen=true
-```
-
-**Supported Parameters:**
-- `value`: Gauge value (0-100)
-- `name`: Gauge name (URL encoded)
-- `units`: Units of measurement
-- `type`: Gauge type (angular, semicircle, quarter, linear, speedometer)
-- `min`: Minimum value
-- `max`: Maximum value
-- `bg`: Background color (hex format with %23 for #)
-- `size`: Gauge size in pixels
-- `fullscreen`: Auto-enter fullscreen mode (true/false)
-
-### 🖥️ Fullscreen Mode
-- **Clean Display**: Hides all controls, shows only the gauge
-- **Responsive Sizing**: Automatically scales to screen size
-- **Exit Options**: Click exit button or press Escape key
-- **Auto-Entry**: Can be triggered via query string parameter
-
-### 🎨 Customization Options
-- **Heat Level Colors**: Automatic gradient from green to red
-- **Resizable Gauges**: Drag resize handles to adjust size
-- **Background Themes**: 6 preset colors plus custom color picker
-- **Quick Presets**: Temperature, Speed, Pressure, Battery configurations
-
-### 📱 Responsive Design
-- **Mobile Optimized**: Touch-friendly controls and responsive layout
-- **Desktop Enhanced**: Full feature set with hover effects
-- **Cross-Browser**: Compatible with all modern browsers
-
-## 🚀 Quick Start
-
-### 1. Upload Files
-Upload all 4 files to your web server or Git repository:
-- `index.html`
-- `styles.css`
-- `script.js`
-- `README.md`
-
-### 2. Basic Usage
-```html
-<!-- Simple gauge display -->
-http://yoursite.com/
-
-<!-- Pre-configured temperature gauge -->
-http://yoursite.com/?value=25&name=Temperature&units=°C&type=angular
+?value=75&name=Temperature&units=°C&type=semicircle&fullscreen=true
 ```
 
-### 3. Fullscreen Dashboard
-```html
-<!-- Auto-fullscreen speedometer -->
-http://yoursite.com/?value=120&name=Speed&units=km/h&type=speedometer&fullscreen=true
+**Available Parameters:**
+- `value` - Gauge value (number)
+- `name` - Gauge name (URL encoded)
+- `min` - Minimum value (number)
+- `max` - Maximum value (number)
+- `units` - Units text (URL encoded)
+- `type` - Gauge type (angular, semicircle, quarter, linear, speedometer)
+- `bg` - Background color (URL encoded hex)
+- `size` - Gauge size in pixels (200-800)
+- `fullscreen` - Auto-fullscreen mode (true/false)
 
-<!-- Battery indicator -->
-http://yoursite.com/?value=85&name=Battery&units=%&type=linear&bg=%23000000&fullscreen=true
+### Examples
+
+**Basic Gauge:**
+```
+https://yoursite.com/
 ```
 
-## 📋 Coolify Deployment
-
-### Method 1: Git Repository (Recommended)
-1. **Create Git Repository**: Upload all 4 files to GitHub/GitLab
-2. **Coolify Setup**:
-   - New Resource → Application
-   - Source: Git Repository
-   - Build Pack: **Static**
-   - Publish Directory: `/`
-   - Leave build commands empty
-3. **Deploy**: Click Deploy and wait for completion
-
-### Method 2: Direct Upload
-1. **Coolify Dashboard**: Create New Application
-2. **Type**: Static Site
-3. **Upload**: All 4 files directly
-4. **Deploy**: Automatic deployment
-
-### Configuration Checklist
-- ✅ Build Pack: Static
-- ✅ Publish Directory: /
-- ✅ Build Command: (empty)
-- ✅ Install Command: (empty)
-
-## 🎮 Usage Examples
-
-### Temperature Monitor
+**Temperature Monitor:**
 ```
-?value=25&name=درجة الحرارة&units=°C&type=angular&bg=%23ffffff
+https://yoursite.com/?value=25&name=Temperature&units=°C&type=semicircle
 ```
 
-### Speed Dashboard
+**Speed Dashboard:**
 ```
-?value=120&name=السرعة&units=km/h&type=speedometer&fullscreen=true
-```
-
-### Battery Level
-```
-?value=75&name=البطارية&units=%&type=linear&bg=%23000000
+https://yoursite.com/?value=120&name=Speed&units=km/h&type=speedometer&fullscreen=true
 ```
 
-### Pressure Gauge
+**Battery Indicator:**
 ```
-?value=35&name=الضغط&units=PSI&type=semicircle&min=0&max=50
+https://yoursite.com/?value=85&name=Battery&units=%&type=linear&bg=%23000000
 ```
 
-## 🔧 Advanced Features
+## Deployment
 
-### Resizable Gauges
-- Hover over gauge to see resize handles
-- Drag corners to resize
-- Size slider for precise control
-- Range: 200px - 600px
+### Static Site Deployment (Recommended)
+This application is a pure HTML/CSS/JavaScript static site with no dependencies.
 
-### Heat Level Colors
-Automatic color mapping based on percentage:
-- **0-20%**: Deep green to green
-- **20-40%**: Green to yellow-green
-- **40-60%**: Yellow-green to yellow
-- **60-80%**: Yellow to orange
-- **80-100%**: Orange to bright red
+**Files to deploy:**
+- `index.html` - Main application
+- `styles.css` - Styling and 3D effects
+- `script.js` - Gauge functionality
+- `favicon.ico` - Browser icon
+- `favicon-16x16.png` - Small PNG icon
+- `favicon-32x32.png` - Standard PNG icon
+- `apple-touch-icon.png` - iOS/Apple devices icon
 
-### Quick Presets
-- **Temperature**: Arabic name, °C units, Angular gauge
-- **Speed**: Arabic name, km/h units, Speedometer
-- **Pressure**: Arabic name, PSI units, Semi-circle
-- **Battery**: Arabic name, % units, Linear gauge
+### Coolify Deployment
+1. Upload all files to your Git repository
+2. In Coolify: New Resource → Application → Git Repository
+3. Select your repository
+4. Set Build Pack to "Static"
+5. Set Publish Directory to "/"
+6. Deploy
 
-## 🌐 Internationalization
+### Other Platforms
+- **Netlify**: Drag and drop all files
+- **Vercel**: Connect Git repository
+- **GitHub Pages**: Upload to repository with Pages enabled
+- **Any static hosting**: Upload all files to web root
 
-### Arabic Support
-- Primary language: Arabic (RTL)
-- Font: Cairo for Arabic text
-- Default gauge name: هبدوميتر
-- Bilingual labels throughout interface
+## Browser Support
+- ✅ Chrome/Chromium (all versions)
+- ✅ Firefox (all versions)
+- ✅ Safari (desktop & mobile)
+- ✅ Edge (all versions)
+- ✅ Mobile browsers (iOS Safari, Android Chrome)
 
-### English Support
-- Secondary language: English (LTR)
-- Font: Roboto for English text
-- Full translation of all controls
-- Professional typography
+## Technical Details
 
-## 📱 Responsive Breakpoints
+### Performance
+- Pure vanilla JavaScript (no frameworks)
+- Canvas-based rendering for smooth animations
+- 60fps animations and transitions
+- Optimized for mobile devices
 
-### Desktop (1024px+)
-- Side-by-side layout
-- Full feature set
-- Hover effects
-- Resize handles
+### Responsive Design
+- Mobile-first approach
+- Touch-friendly controls
+- Adaptive layouts for all screen sizes
+- Fullscreen mode optimized for presentations
 
-### Tablet (768px - 1024px)
-- Stacked layout
-- Touch-optimized controls
-- Simplified interface
+### Accessibility
+- Keyboard navigation support
+- High contrast color options
+- Screen reader friendly
+- Touch and mouse interaction support
 
-### Mobile (< 768px)
-- Single column
-- Large touch targets
-- Optimized gauge sizes
-- Simplified color picker
-
-## 🔍 Browser Support
-
-### Fully Supported
-- Chrome/Chromium 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
-
-### Mobile Browsers
-- iOS Safari 12+
-- Chrome Mobile 60+
-- Samsung Internet 8+
-- Firefox Mobile 55+
-
-## ⚡ Performance
-
-### Optimizations
-- Canvas-based rendering (60fps)
-- Hardware acceleration
-- Efficient animation loops
-- Memory leak prevention
-- HiDPI display support
-
-### Loading Speed
-- Zero external dependencies
-- Optimized CSS/JS
-- Compressed assets
-- Fast initial render
-
-## 🛠️ Customization
+## Customization
 
 ### Adding New Gauge Types
-Extend the `Habdometer` class:
+1. Add new option to `gaugeType` select in HTML
+2. Create new draw function in `script.js`
+3. Add case to `drawGauge()` switch statement
 
-```javascript
-drawCustomGauge() {
-    // Your custom gauge implementation
-    // Use this.centerX, this.centerY, this.radius
-    // Call this.getHeatColor(percentage) for colors
-}
-```
+### Modifying Colors
+Heat level colors are generated in `getHeatColor()` function:
+- Green (0-50%): RGB transition from green to yellow
+- Red (50-100%): RGB transition from yellow to red
 
-### Custom Color Schemes
-Modify the `getHeatColor()` function:
+### Styling Changes
+All visual effects are in `styles.css`:
+- 3D effects use CSS transforms and shadows
+- Glass morphism uses backdrop-filter
+- Animations use CSS transitions
 
-```javascript
-getHeatColor(percentage) {
-    // Your custom color mapping
-    // Return RGB string: 'rgb(r, g, b)'
-}
-```
-
-### New Quick Presets
-Add to the `presets` object:
-
-```javascript
-const presets = {
-    custom: {
-        name: 'Custom Name',
-        units: 'unit',
-        min: 0,
-        max: 100,
-        value: 50,
-        type: 'angular'
-    }
-};
-```
-
-## 📊 API Reference
-
-### URL Parameters
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| `value` | Number | Current gauge value | `75` |
-| `name` | String | Gauge display name | `Temperature` |
-| `units` | String | Units of measurement | `°C` |
-| `type` | String | Gauge type | `semicircle` |
-| `min` | Number | Minimum value | `0` |
-| `max` | Number | Maximum value | `100` |
-| `bg` | String | Background color (hex) | `%23ffffff` |
-| `size` | Number | Gauge size in pixels | `400` |
-| `fullscreen` | Boolean | Auto-fullscreen mode | `true` |
-
-### Gauge Types
-- `angular` - 270° arc gauge (default)
-- `semicircle` - 180° half-circle gauge
-- `quarter` - 90° quarter-circle gauge
-- `linear` - Horizontal bar gauge
-- `speedometer` - Extended arc automotive gauge
-
-### JavaScript API
-```javascript
-// Create new gauge
-const gauge = new Habdometer('canvasId');
-
-// Update values
-gauge.setValue(75);
-gauge.setRange(0, 100);
-gauge.setGaugeName('Temperature');
-gauge.setUnits('°C');
-gauge.setGaugeType('angular');
-gauge.setBackgroundColor('#ffffff');
-gauge.setSize(400);
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Gauge not displaying:**
-- Check canvas element exists
-- Verify JavaScript loaded
-- Check browser console for errors
-
-**Query string not working:**
-- Ensure proper URL encoding
-- Check parameter spelling
-- Verify values are within valid ranges
-
-**Fullscreen not working:**
-- Check browser permissions
-- Try F11 key or button click
-- Verify no JavaScript errors
-
-**Colors not updating:**
-- Check hex color format (#rrggbb)
-- Verify color picker support
-- Try preset colors first
-
-### Performance Issues
-
-**Slow animation:**
-- Reduce gauge size
-- Check for other heavy scripts
-- Verify hardware acceleration
-
-**Memory leaks:**
-- Refresh page periodically
-- Check for multiple gauge instances
-- Monitor browser memory usage
-
-## 📄 License
-
+## License
 This project is open source and available under the MIT License.
 
-## 🤝 Support
-
-For issues, feature requests, or contributions:
-1. Check this documentation first
-2. Verify browser compatibility
-3. Test with minimal configuration
-4. Report with specific error messages
+## Support
+For issues or questions, please check the documentation or create an issue in the repository.
 
 ---
 
-**هبدوميتر** - Professional gauge visualization for the modern web.
-
-Made with ❤️ for the Arabic-speaking community and beyond.
+**Version**: 2.0.0  
+**Last Updated**: 2025  
+**Compatibility**: All modern browsers
 

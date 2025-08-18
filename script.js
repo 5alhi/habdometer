@@ -1,5 +1,5 @@
 // Habdometer - Professional Gauge Visualizer
-// Enhanced with multiple gauge types, query string support, and fullscreen functionality
+// Clean version with proper angular gauge and enhanced speedometer
 
 document.addEventListener('DOMContentLoaded', function() {
     // Parse query string parameters on page load
@@ -207,11 +207,17 @@ function updateGauge() {
 function updateGaugeSize() {
     const size = parseInt(document.getElementById('gaugeSize').value);
     const canvas = document.getElementById('gaugeCanvas');
+    const wrapper = document.getElementById('gaugeWrapper');
     
+    // Update canvas dimensions
     canvas.width = size;
     canvas.height = size;
     canvas.style.width = size + 'px';
     canvas.style.height = size + 'px';
+    
+    // Update wrapper dimensions to match
+    wrapper.style.width = size + 'px';
+    wrapper.style.height = size + 'px';
     
     updateGauge();
 }
@@ -277,11 +283,11 @@ function toggleFullscreen() {
     if (overlay.classList.contains('active')) {
         // Exit fullscreen
         overlay.classList.remove('active');
-        container.classList.remove('fullscreen-mode');
+        if (container) container.classList.remove('fullscreen-mode');
     } else {
         // Enter fullscreen
         overlay.classList.add('active');
-        container.classList.add('fullscreen-mode');
+        if (container) container.classList.add('fullscreen-mode');
         
         // Update fullscreen canvas size for optimal display
         const fullscreenCanvas = document.getElementById('fullscreenCanvas');
@@ -328,59 +334,86 @@ function drawGauge(canvasId, type, value, min, max, name, units) {
 }
 
 function drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units) {
-    const startAngle = -Math.PI * 0.75;
-    const endAngle = Math.PI * 0.75;
+    // Angular gauge - arc around the bottom (like a speedometer but smaller arc)
+    const startAngle = Math.PI * 0.75; // Start at bottom left
+    const endAngle = Math.PI * 2.25;   // End at bottom right
     const totalAngle = endAngle - startAngle;
     const currentAngle = startAngle + (totalAngle * percentage);
     
-    // Draw outer metallic ring
-    drawMetallicRing(ctx, centerX, centerY, radius + 15, radius + 25);
+    // Draw outer decorative ring
+    const outerGradient = ctx.createRadialGradient(centerX, centerY, radius + 15, centerX, centerY, radius + 25);
+    outerGradient.addColorStop(0, '#e0e0e0');
+    outerGradient.addColorStop(0.5, '#c0c0c0');
+    outerGradient.addColorStop(1, '#a0a0a0');
     
-    // Draw background arc with 3D effect
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 20, 0, 2 * Math.PI);
+    ctx.arc(centerX, centerY, radius + 10, 0, 2 * Math.PI, true);
+    ctx.fillStyle = outerGradient;
+    ctx.fill();
+    
+    // Draw gauge face with texture
+    const faceGradient = ctx.createRadialGradient(centerX - 20, centerY - 20, 0, centerX, centerY, radius);
+    faceGradient.addColorStop(0, '#f8f8f8');
+    faceGradient.addColorStop(0.7, '#e8e8e8');
+    faceGradient.addColorStop(1, '#d0d0d0');
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 5, 0, 2 * Math.PI);
+    ctx.fillStyle = faceGradient;
+    ctx.fill();
+    
+    // Draw background arc with gradient
+    const bgGradient = ctx.createLinearGradient(centerX - radius, centerY, centerX + radius, centerY);
+    bgGradient.addColorStop(0, '#f0f0f0');
+    bgGradient.addColorStop(0.5, '#e8e8e8');
+    bgGradient.addColorStop(1, '#f0f0f0');
+    
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, endAngle);
     ctx.lineWidth = 25;
-    ctx.strokeStyle = createGradient(ctx, centerX, centerY, radius, '#2c3e50', '#34495e');
+    ctx.strokeStyle = bgGradient;
     ctx.stroke();
     
-    // Draw inner shadow
+    // Draw inner shadow on background arc
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius - 12, startAngle, endAngle);
     ctx.lineWidth = 8;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
     ctx.stroke();
     
-    // Draw colored arc with heat level and 3D effect
+    // Draw colored arc based on heat level with enhanced gradient
     const color = getHeatColor(percentage);
-    const gradient = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
-    gradient.addColorStop(0, lightenColor(color, 30));
-    gradient.addColorStop(0.5, color);
-    gradient.addColorStop(1, darkenColor(color, 20));
+    const colorGradient = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+    colorGradient.addColorStop(0, lightenColor(color, 30));
+    colorGradient.addColorStop(0.3, color);
+    colorGradient.addColorStop(0.7, color);
+    colorGradient.addColorStop(1, darkenColor(color, 20));
     
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, currentAngle);
     ctx.lineWidth = 25;
-    ctx.strokeStyle = gradient;
+    ctx.strokeStyle = colorGradient;
     ctx.stroke();
     
     // Draw highlight on colored arc
     ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + 8, startAngle, currentAngle);
+    ctx.arc(centerX, centerY, radius + 10, startAngle, currentAngle);
     ctx.lineWidth = 4;
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.stroke();
     
-    // Draw tick marks
-    drawCarStyleTicks(ctx, centerX, centerY, radius, startAngle, endAngle, 0, 100);
+    // Draw detailed tick marks with numbers
+    drawDetailedTickMarks(ctx, centerX, centerY, radius, startAngle, endAngle, 10);
     
-    // Draw 3D needle
-    draw3DNeedle(ctx, centerX, centerY, radius - 35, currentAngle);
+    // Draw enhanced needle with 3D effect
+    drawEnhancedNeedle(ctx, centerX, centerY, radius - 35, currentAngle);
     
-    // Draw center hub with 3D effect
-    drawCenterHub(ctx, centerX, centerY, 25);
+    // Draw center hub with detailed design
+    drawDetailedCenterHub(ctx, centerX, centerY, 25);
     
-    // Draw text with car-style font
-    drawCarStyleText(ctx, centerX, centerY + radius + 50, value, units, name);
+    // Draw enhanced text with styling
+    drawEnhancedGaugeText(ctx, centerX, centerY + 60, value, units, name);
 }
 
 function drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, name, units) {
@@ -389,54 +422,96 @@ function drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, n
     const totalAngle = endAngle - startAngle;
     const currentAngle = startAngle + (totalAngle * percentage);
     
-    // Draw outer metallic ring
-    drawMetallicRing(ctx, centerX, centerY, radius + 15, radius + 25);
-    
-    // Draw background arc with 3D effect
+    // Draw background arc
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.lineWidth = 30;
-    ctx.strokeStyle = createGradient(ctx, centerX, centerY, radius, '#2c3e50', '#34495e');
+    ctx.lineWidth = 25;
+    ctx.strokeStyle = '#e0e0e0';
     ctx.stroke();
     
-    // Draw inner shadow
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius - 15, startAngle, endAngle);
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.stroke();
-    
-    // Draw colored arc with heat level and 3D effect
+    // Draw colored arc
     const color = getHeatColor(percentage);
-    const gradient = ctx.createLinearGradient(centerX - radius, centerY, centerX + radius, centerY);
-    gradient.addColorStop(0, lightenColor(color, 30));
-    gradient.addColorStop(0.5, color);
-    gradient.addColorStop(1, darkenColor(color, 20));
-    
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, currentAngle);
-    ctx.lineWidth = 30;
-    ctx.strokeStyle = gradient;
-    ctx.stroke();
-    
-    // Draw highlight
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + 10, startAngle, currentAngle);
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+    ctx.lineWidth = 25;
+    ctx.strokeStyle = color;
     ctx.stroke();
     
     // Draw tick marks
-    drawCarStyleTicks(ctx, centerX, centerY, radius, startAngle, endAngle, 0, 100);
+    drawTickMarks(ctx, centerX, centerY, radius, startAngle, endAngle, 6);
     
-    // Draw 3D needle
-    draw3DNeedle(ctx, centerX, centerY, radius - 40, currentAngle);
+    // Draw needle
+    drawNeedle(ctx, centerX, centerY, radius - 35, currentAngle);
     
-    // Draw center hub
-    drawCenterHub(ctx, centerX, centerY, 30);
+    // Draw center circle
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
     
     // Draw text
-    drawCarStyleText(ctx, centerX, centerY + 60, value, units, name);
+    drawGaugeText(ctx, centerX, centerY + 50, value, units, name);
+}
+
+function drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units) {
+    const startAngle = Math.PI;
+    const endAngle = Math.PI * 1.5;
+    const totalAngle = endAngle - startAngle;
+    const currentAngle = startAngle + (totalAngle * percentage);
+    
+    // Draw background arc
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+    ctx.lineWidth = 30;
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.stroke();
+    
+    // Draw colored arc
+    const color = getHeatColor(percentage);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, startAngle, currentAngle);
+    ctx.lineWidth = 30;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    
+    // Draw tick marks
+    drawTickMarks(ctx, centerX, centerY, radius, startAngle, endAngle, 4);
+    
+    // Draw needle
+    drawNeedle(ctx, centerX, centerY, radius - 40, currentAngle);
+    
+    // Draw center circle
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+    
+    // Draw text
+    drawGaugeText(ctx, centerX - 50, centerY + 50, value, units, name);
+}
+
+function drawLinearGauge(ctx, width, height, percentage, value, name, units) {
+    const barWidth = width * 0.8;
+    const barHeight = 40;
+    const x = (width - barWidth) / 2;
+    const y = height / 2 - barHeight / 2;
+    
+    // Draw background bar
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fillRect(x, y, barWidth, barHeight);
+    
+    // Draw colored bar
+    const color = getHeatColor(percentage);
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, barWidth * percentage, barHeight);
+    
+    // Draw border
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, barWidth, barHeight);
+    
+    // Draw text
+    drawGaugeText(ctx, width / 2, y + barHeight + 60, value, units, name);
 }
 
 function drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units, min, max) {
@@ -495,27 +570,234 @@ function drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, 
     drawCarStyleText(ctx, centerX, centerY + radius + 70, '', '', name);
 }
 
-function drawMetallicRing(ctx, centerX, centerY, innerRadius, outerRadius) {
-    const gradient = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius);
-    gradient.addColorStop(0, '#e8e8e8');
-    gradient.addColorStop(0.3, '#c0c0c0');
-    gradient.addColorStop(0.7, '#a0a0a0');
-    gradient.addColorStop(1, '#808080');
+function drawDetailedTickMarks(ctx, centerX, centerY, radius, startAngle, endAngle, majorTicks) {
+    const totalAngle = endAngle - startAngle;
+    const minorTicks = majorTicks * 5;
+    
+    // Major ticks with numbers
+    for (let i = 0; i <= majorTicks; i++) {
+        const angle = startAngle + (totalAngle * i / majorTicks);
+        const value = Math.round((i / majorTicks) * 100);
+        
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle);
+        
+        // Major tick with gradient
+        const tickGradient = ctx.createLinearGradient(0, -3, 0, 3);
+        tickGradient.addColorStop(0, '#666666');
+        tickGradient.addColorStop(0.5, '#333333');
+        tickGradient.addColorStop(1, '#666666');
+        
+        ctx.beginPath();
+        ctx.moveTo(radius - 30, 0);
+        ctx.lineTo(radius - 10, 0);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = tickGradient;
+        ctx.stroke();
+        
+        // Number with shadow
+        if (i % 2 === 0) { // Show every other number to avoid crowding
+            ctx.save();
+            ctx.translate(radius - 45, 0);
+            ctx.rotate(-angle);
+            
+            // Text shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.font = 'bold 14px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(value, 1, 1);
+            
+            // Main text
+            ctx.fillStyle = '#333333';
+            ctx.fillText(value, 0, 0);
+            
+            ctx.restore();
+        }
+        
+        ctx.restore();
+    }
+    
+    // Minor ticks
+    for (let i = 0; i <= minorTicks; i++) {
+        if (i % 5 !== 0) { // Skip major tick positions
+            const angle = startAngle + (totalAngle * i / minorTicks);
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angle);
+            
+            ctx.beginPath();
+            ctx.moveTo(radius - 20, 0);
+            ctx.lineTo(radius - 10, 0);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#999999';
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+    }
+}
+
+function drawEnhancedNeedle(ctx, centerX, centerY, length, angle) {
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(angle);
+    
+    // Needle shadow
+    ctx.save();
+    ctx.translate(2, 2);
+    ctx.beginPath();
+    ctx.moveTo(-15, -3);
+    ctx.lineTo(length, -1);
+    ctx.lineTo(length, 1);
+    ctx.lineTo(-15, 3);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fill();
+    ctx.restore();
+    
+    // Main needle with metallic gradient
+    const needleGradient = ctx.createLinearGradient(0, -3, 0, 3);
+    needleGradient.addColorStop(0, '#ff4444');
+    needleGradient.addColorStop(0.3, '#cc0000');
+    needleGradient.addColorStop(0.7, '#990000');
+    needleGradient.addColorStop(1, '#660000');
     
     ctx.beginPath();
-    ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-    ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
-    ctx.fillStyle = gradient;
+    ctx.moveTo(-15, -3);
+    ctx.lineTo(length - 10, -2);
+    ctx.lineTo(length, -1);
+    ctx.lineTo(length, 1);
+    ctx.lineTo(length - 10, 2);
+    ctx.lineTo(-15, 3);
+    ctx.closePath();
+    ctx.fillStyle = needleGradient;
     ctx.fill();
     
-    // Add metallic highlight
+    // Needle highlight
     ctx.beginPath();
-    ctx.arc(centerX - 5, centerY - 5, outerRadius, 0, Math.PI);
-    ctx.arc(centerX - 5, centerY - 5, innerRadius, Math.PI, 0, true);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.moveTo(-15, -1);
+    ctx.lineTo(length - 10, -0.5);
+    ctx.lineTo(length - 5, 0);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Needle tip
+    ctx.beginPath();
+    ctx.arc(length, 0, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#cc0000';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    ctx.restore();
+}
+
+function drawDetailedCenterHub(ctx, centerX, centerY, radius) {
+    // Hub shadow
+    ctx.beginPath();
+    ctx.arc(centerX + 2, centerY + 2, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fill();
+    
+    // Main hub with metallic gradient
+    const hubGradient = ctx.createRadialGradient(centerX - 5, centerY - 5, 0, centerX, centerY, radius);
+    hubGradient.addColorStop(0, '#ffffff');
+    hubGradient.addColorStop(0.3, '#e0e0e0');
+    hubGradient.addColorStop(0.7, '#c0c0c0');
+    hubGradient.addColorStop(1, '#a0a0a0');
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = hubGradient;
+    ctx.fill();
+    
+    // Hub border
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = '#666666';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Inner circle
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius - 8, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333333';
+    ctx.fill();
+    
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffffff';
     ctx.fill();
 }
 
+function drawEnhancedGaugeText(ctx, x, y, value, units, name) {
+    // Value with enhanced styling
+    ctx.save();
+    
+    // Text shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.font = 'bold 28px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText(value + units, x + 2, y + 2);
+    
+    // Main text with gradient
+    const textGradient = ctx.createLinearGradient(x, y - 15, x, y + 15);
+    textGradient.addColorStop(0, '#333333');
+    textGradient.addColorStop(0.5, '#000000');
+    textGradient.addColorStop(1, '#333333');
+    
+    ctx.fillStyle = textGradient;
+    ctx.font = 'bold 28px Inter';
+    ctx.fillText(value + units, x, y);
+    
+    // Name with styling
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.font = '16px Inter';
+    ctx.fillText(name, x + 1, y + 26);
+    
+    ctx.fillStyle = '#666666';
+    ctx.fillText(name, x, y + 25);
+    
+    ctx.restore();
+}
+
+function drawGaugeText(ctx, x, y, value, units, name) {
+    // Draw value
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText(value + units, x, y);
+    
+    // Draw name
+    ctx.font = '16px Inter';
+    ctx.fillStyle = '#666';
+    ctx.fillText(name, x, y + 25);
+}
+
+function getHeatColor(percentage) {
+    // Create smooth color transition from green to red
+    if (percentage <= 0.5) {
+        // Green to yellow
+        const r = Math.round(255 * (percentage * 2));
+        const g = 255;
+        const b = 0;
+        return `rgb(${r}, ${g}, ${b})`;
+    } else {
+        // Yellow to red
+        const r = 255;
+        const g = Math.round(255 * (2 - percentage * 2));
+        const b = 0;
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+}
+
+// Car odometer specific functions
 function drawChromeRing(ctx, centerX, centerY, innerRadius, outerRadius) {
     const gradient = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius);
     gradient.addColorStop(0, '#f0f0f0');
@@ -566,63 +848,6 @@ function drawCarGaugeFace(ctx, centerX, centerY, radius) {
         ctx.strokeStyle = `rgba(255, 255, 255, 0.1)`;
         ctx.lineWidth = 1;
         ctx.stroke();
-    }
-}
-
-function drawCarStyleTicks(ctx, centerX, centerY, radius, startAngle, endAngle, min, max) {
-    const totalAngle = endAngle - startAngle;
-    const majorTicks = 10;
-    const minorTicks = 50;
-    
-    // Major ticks
-    for (let i = 0; i <= majorTicks; i++) {
-        const angle = startAngle + (totalAngle * i / majorTicks);
-        const value = min + ((max - min) * i / majorTicks);
-        
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle);
-        
-        // Major tick mark
-        ctx.beginPath();
-        ctx.moveTo(radius - 30, 0);
-        ctx.lineTo(radius - 10, 0);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = '#ffffff';
-        ctx.stroke();
-        
-        // Value label with car-style font
-        ctx.save();
-        ctx.translate(radius - 45, 0);
-        ctx.rotate(-angle);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(Math.round(value), 0, 0);
-        ctx.restore();
-        
-        ctx.restore();
-    }
-    
-    // Minor ticks
-    for (let i = 0; i <= minorTicks; i++) {
-        if (i % 5 !== 0) { // Skip major tick positions
-            const angle = startAngle + (totalAngle * i / minorTicks);
-            
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(angle);
-            
-            ctx.beginPath();
-            ctx.moveTo(radius - 20, 0);
-            ctx.lineTo(radius - 10, 0);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.stroke();
-            
-            ctx.restore();
-        }
     }
 }
 
@@ -691,60 +916,6 @@ function drawDetailedCarTicks(ctx, centerX, centerY, radius, startAngle, endAngl
     }
 }
 
-function draw3DNeedle(ctx, centerX, centerY, length, angle) {
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate(angle);
-    
-    // Needle shadow
-    ctx.save();
-    ctx.translate(2, 2);
-    ctx.beginPath();
-    ctx.moveTo(-15, -3);
-    ctx.lineTo(length, 0);
-    ctx.lineTo(-15, 3);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.fill();
-    ctx.restore();
-    
-    // Main needle body with gradient
-    const needleGradient = ctx.createLinearGradient(0, -3, 0, 3);
-    needleGradient.addColorStop(0, '#ff4444');
-    needleGradient.addColorStop(0.5, '#cc0000');
-    needleGradient.addColorStop(1, '#880000');
-    
-    ctx.beginPath();
-    ctx.moveTo(-15, -3);
-    ctx.lineTo(length - 10, -1);
-    ctx.lineTo(length, 0);
-    ctx.lineTo(length - 10, 1);
-    ctx.lineTo(-15, 3);
-    ctx.closePath();
-    ctx.fillStyle = needleGradient;
-    ctx.fill();
-    
-    // Needle highlight
-    ctx.beginPath();
-    ctx.moveTo(-15, -1);
-    ctx.lineTo(length - 10, -0.5);
-    ctx.lineTo(length - 5, 0);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
-    // Needle tip
-    ctx.beginPath();
-    ctx.arc(length, 0, 3, 0, 2 * Math.PI);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.strokeStyle = '#cc0000';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
-    ctx.restore();
-}
-
 function drawCarStyleNeedle(ctx, centerX, centerY, length, angle) {
     ctx.save();
     ctx.translate(centerX, centerY);
@@ -799,40 +970,6 @@ function drawCarStyleNeedle(ctx, centerX, centerY, length, angle) {
     ctx.fill();
     
     ctx.restore();
-}
-
-function drawCenterHub(ctx, centerX, centerY, radius) {
-    // Hub shadow
-    ctx.beginPath();
-    ctx.arc(centerX + 2, centerY + 2, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.fill();
-    
-    // Main hub with metallic gradient
-    const hubGradient = ctx.createRadialGradient(centerX - 5, centerY - 5, 0, centerX, centerY, radius);
-    hubGradient.addColorStop(0, '#ffffff');
-    hubGradient.addColorStop(0.3, '#e0e0e0');
-    hubGradient.addColorStop(0.7, '#c0c0c0');
-    hubGradient.addColorStop(1, '#808080');
-    
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = hubGradient;
-    ctx.fill();
-    
-    // Hub ring
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.strokeStyle = '#666666';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // Inner detail
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius - 8, 0, 2 * Math.PI);
-    ctx.strokeStyle = '#999999';
-    ctx.lineWidth = 1;
-    ctx.stroke();
 }
 
 function drawCarCenterHub(ctx, centerX, centerY, radius) {
@@ -903,25 +1040,6 @@ function drawDigitalDisplay(ctx, centerX, centerY, value, units) {
 }
 
 function drawCarStyleText(ctx, x, y, value, units, name) {
-    if (value !== '') {
-        // Value with metallic effect
-        const valueGradient = ctx.createLinearGradient(x, y - 20, x, y + 20);
-        valueGradient.addColorStop(0, '#ffffff');
-        valueGradient.addColorStop(0.5, '#e0e0e0');
-        valueGradient.addColorStop(1, '#c0c0c0');
-        
-        ctx.fillStyle = valueGradient;
-        ctx.font = 'bold 28px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(value + units, x, y);
-        
-        // Text outline
-        ctx.strokeStyle = '#666666';
-        ctx.lineWidth = 1;
-        ctx.strokeText(value + units, x, y);
-    }
-    
     if (name !== '') {
         // Name with chrome effect
         const nameGradient = ctx.createLinearGradient(x, y + 15, x, y + 35);
@@ -965,192 +1083,25 @@ function lightenColor(color, percent) {
     return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
 }
 
-function drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units) {
-    const startAngle = Math.PI;
-    const endAngle = Math.PI * 1.5;
-    const totalAngle = endAngle - startAngle;
-    const currentAngle = startAngle + (totalAngle * percentage);
-    
-    // Draw background arc
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.lineWidth = 30;
-    ctx.strokeStyle = '#e0e0e0';
-    ctx.stroke();
-    
-    // Draw colored arc
-    const color = getHeatColor(percentage);
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, startAngle, currentAngle);
-    ctx.lineWidth = 30;
-    ctx.strokeStyle = color;
-    ctx.stroke();
-    
-    // Draw needle
-    drawNeedle(ctx, centerX, centerY, radius - 40, currentAngle);
-    
-    // Draw center circle
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
-    ctx.fillStyle = '#333';
-    ctx.fill();
-    
-    // Draw text
-    drawGaugeText(ctx, centerX - 50, centerY + 50, value, units, name);
-}
-
-function drawLinearGauge(ctx, width, height, percentage, value, name, units) {
-    const barWidth = width * 0.8;
-    const barHeight = 40;
-    const x = (width - barWidth) / 2;
-    const y = height / 2 - barHeight / 2;
-    
-    // Draw background bar
-    ctx.fillStyle = '#e0e0e0';
-    ctx.fillRect(x, y, barWidth, barHeight);
-    
-    // Draw colored bar
-    const color = getHeatColor(percentage);
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, barWidth * percentage, barHeight);
-    
-    // Draw border
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, barWidth, barHeight);
-    
-    // Draw text
-    drawGaugeText(ctx, width / 2, y + barHeight + 60, value, units, name);
-}
-
-function drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units, min, max) {
-    const startAngle = Math.PI * 0.75;
-    const endAngle = Math.PI * 2.25;
-    const totalAngle = endAngle - startAngle;
-    const currentAngle = startAngle + (totalAngle * percentage);
-    
-    // Draw outer ring
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + 10, 0, 2 * Math.PI);
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#333';
-    ctx.stroke();
-    
-    // Draw background arc
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.lineWidth = 15;
-    ctx.strokeStyle = '#e0e0e0';
-    ctx.stroke();
-    
-    // Draw colored arc
-    const color = getHeatColor(percentage);
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, startAngle, currentAngle);
-    ctx.lineWidth = 15;
-    ctx.strokeStyle = color;
-    ctx.stroke();
-    
-    // Draw tick marks
-    drawTickMarks(ctx, centerX, centerY, radius, startAngle, endAngle, min, max);
-    
-    // Draw needle
-    drawNeedle(ctx, centerX, centerY, radius - 20, currentAngle);
-    
-    // Draw center circle
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI);
-    ctx.fillStyle = '#333';
-    ctx.fill();
-    
-    // Draw text
-    drawGaugeText(ctx, centerX, centerY + radius + 60, value, units, name);
-}
-
-function drawNeedle(ctx, centerX, centerY, length, angle) {
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate(angle);
-    
-    // Draw needle
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(length, 0);
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#333';
-    ctx.stroke();
-    
-    // Draw needle tip
-    ctx.beginPath();
-    ctx.arc(length, 0, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = '#e74c3c';
-    ctx.fill();
-    
-    ctx.restore();
-}
-
-function drawTickMarks(ctx, centerX, centerY, radius, startAngle, endAngle, min, max) {
-    const totalAngle = endAngle - startAngle;
-    const steps = 10;
-    
-    for (let i = 0; i <= steps; i++) {
-        const angle = startAngle + (totalAngle * i / steps);
-        const value = min + ((max - min) * i / steps);
-        
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle);
-        
-        // Draw tick mark
-        ctx.beginPath();
-        ctx.moveTo(radius - 25, 0);
-        ctx.lineTo(radius - 10, 0);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#333';
-        ctx.stroke();
-        
-        // Draw value label
-        ctx.save();
-        ctx.translate(radius - 35, 0);
-        ctx.rotate(-angle);
-        ctx.fillStyle = '#333';
-        ctx.font = '12px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(Math.round(value), 0, 4);
-        ctx.restore();
-        
-        ctx.restore();
+function darkenColor(hex, percent) {
+    // Handle RGB color format
+    if (hex.startsWith('rgb')) {
+        const matches = hex.match(/\d+/g);
+        const r = parseInt(matches[0]);
+        const g = parseInt(matches[1]);
+        const b = parseInt(matches[2]);
+        hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
-}
-
-function drawGaugeText(ctx, x, y, value, units, name) {
-    // Draw value
-    ctx.fillStyle = '#333';
-    ctx.font = 'bold 24px Inter';
-    ctx.textAlign = 'center';
-    ctx.fillText(value + units, x, y);
     
-    // Draw name
-    ctx.font = '16px Inter';
-    ctx.fillStyle = '#666';
-    ctx.fillText(name, x, y + 25);
-}
-
-function getHeatColor(percentage) {
-    // Create smooth color transition from green to red
-    if (percentage <= 0.5) {
-        // Green to yellow
-        const r = Math.round(255 * (percentage * 2));
-        const g = 255;
-        const b = 0;
-        return `rgb(${r}, ${g}, ${b})`;
-    } else {
-        // Yellow to red
-        const r = 255;
-        const g = Math.round(255 * (2 - percentage * 2));
-        const b = 0;
-        return `rgb(${r}, ${g}, ${b})`;
-    }
+    const r = parseInt(hex.substr(1, 2), 16);
+    const g = parseInt(hex.substr(3, 2), 16);
+    const b = parseInt(hex.substr(5, 2), 16);
+    
+    const newR = Math.max(0, Math.round(r * (100 - percent) / 100));
+    const newG = Math.max(0, Math.round(g * (100 - percent) / 100));
+    const newB = Math.max(0, Math.round(b * (100 - percent) / 100));
+    
+    return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
 }
 
 function initializeResize() {
@@ -1178,17 +1129,24 @@ function initializeResize() {
         
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
+        
+        // Use the larger delta to maintain square aspect ratio
         const delta = Math.max(deltaX, deltaY);
         
         let newSize = Math.max(200, Math.min(800, startWidth + delta));
         
         const canvas = document.getElementById('gaugeCanvas');
+        const wrapper = document.getElementById('gaugeWrapper');
         const sizeSlider = document.getElementById('gaugeSize');
         
+        // Update both canvas and wrapper dimensions
         canvas.width = newSize;
         canvas.height = newSize;
         canvas.style.width = newSize + 'px';
         canvas.style.height = newSize + 'px';
+        
+        wrapper.style.width = newSize + 'px';
+        wrapper.style.height = newSize + 'px';
         
         sizeSlider.value = newSize;
         document.getElementById('gaugeSizeDisplay').textContent = newSize + 'px';
