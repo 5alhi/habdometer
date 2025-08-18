@@ -1224,6 +1224,7 @@ window.addEventListener('resize', function() {
 // Timed warning system
 function showTimedWarning(warningElement, duration, interval) {
     // Show warning with fade in
+    warningElement.style.display = 'flex'; // Add this line 
     warningElement.classList.remove('fade-out');
     warningElement.classList.add('show');
     
