@@ -283,31 +283,74 @@ function initializeApp() {
 }
 
 function startJitter() {
-
-    if (!jitterActive) return;
+if (!jitterActive) return;
     const gaugeValue = document.getElementById('gaugeValue');
     const originalValue = parseFloat(gaugeValue.value);
     const threshold = parseFloat(document.getElementById('warningThreshold').value);
     const maxValue = parseFloat(document.getElementById('maxValue').value);
 
-    // If at or above max, allow needle to exceed max erratically
+// If at or above max, allow needle to exceed max erratically
     if (originalValue >= maxValue) {
-        // Jitter between max and max + 10% of max
-        const jitterAmount = Math.random() * (maxValue * 0.1);
+        // Jitter between max and max + 20% of max
+        const jitterAmount = Math.random() * (maxValue * 0.2);
         const displayValue = Math.round(maxValue + jitterAmount);
         redrawGaugeOnly(displayValue);
+        redrawFullscreenGaugeOnly(displayValue); // <-- Add this line
         setTimeout(startJitter, 50);
     } else if (originalValue > threshold) {
         // Normal jitter between threshold and max
         const jitterAmount = (Math.random() - 0.5) * 2;
         const displayValue = Math.round(Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue)));
         redrawGaugeOnly(displayValue);
+        redrawFullscreenGaugeOnly(displayValue); // <-- Add this line
         setTimeout(startJitter, 50);
     } else {
         redrawGaugeOnly(Math.round(originalValue));
+        redrawFullscreenGaugeOnly(Math.round(originalValue)); // <-- Add this line
         jitterActive = false;
-    }
 }
+
+}
+
+
+// Add this helper function for fullscreen jitter redraw
+
+function redrawFullscreenGaugeOnly(displayValue) {
+    const canvas = document.getElementById('fullscreenCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const value = Math.round(displayValue !== undefined ? displayValue : parseFloat(document.getElementById('gaugeValue').value));
+    const name = document.getElementById('gaugeName').value;
+    const type = document.getElementById('gaugeType').value;
+    const min = parseFloat(document.getElementById('minValue').value);
+    const max = parseFloat(document.getElementById('maxValue').value);
+    const units = document.getElementById('units').value;
+    // Allow percentage to exceed 1 for jitter above max
+    const percentage = Math.max(0, (value - min) / (max - min));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+    switch (type) {
+        case 'angular':
+            drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'semicircle':
+            drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'quarter':
+            drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'linear':
+            drawLinearGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'speedometer':
+            drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+     }
+}
+
+
 
 
 // Redraw only the gauge without triggering warning/jitter logic
