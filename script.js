@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Warning timer variables
+let warningTimer = null;
+let warningIntervalTimer = null;
+let isWarningActive = false;
+let jitterActive = false;
+
+
+
 function parseQueryString() {
     const urlParams = new URLSearchParams(window.location.search);
     
@@ -97,12 +105,7 @@ function initializeApp() {
     const warningText = document.getElementById('warningText');
     const warningDuration = document.getElementById('warningDuration');
     const warningInterval = document.getElementById('warningInterval');
-    
-    // Warning timer variables
-    let warningTimer = null;
-    let warningIntervalTimer = null;
-    let isWarningActive = false;
-    let jitterActive = false;
+    const value = Math.round(parseFloat(document.getElementById('gaugeValue').value));
 
     document.addEventListener('DOMContentLoaded', function() {
     parseQueryString();
@@ -280,29 +283,24 @@ function initializeApp() {
 }
 
 function startJitter() {
+
     if (!jitterActive) return;
     const gaugeValue = document.getElementById('gaugeValue');
     const originalValue = parseFloat(gaugeValue.value);
     const threshold = parseFloat(document.getElementById('warningThreshold').value);
     const maxValue = parseFloat(document.getElementById('maxValue').value);
-
-    // Only jitter if above threshold
     if (originalValue > threshold) {
-        // Random jitter between -1 and +1
         const jitterAmount = (Math.random() - 0.5) * 2;
-        const newValue = Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue));
-        gaugeValue.value = newValue;
-        document.getElementById('gaugeSlider').value = newValue;
-        // Redraw gauge (but do not trigger another jitter loop)
-        redrawGaugeOnly();
-        setTimeout(startJitter, 50); // ~20 FPS
+        const displayValue = Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue));
+        redrawGaugeOnly(displayValue);
+        setTimeout(startJitter, 50);
     } else {
-        gaugeValue.value = originalValue;
-        document.getElementById('gaugeSlider').value = originalValue;
-        redrawGaugeOnly();
-        jitterActive = false;
+        redrawGaugeOnly(originalValue);
+         jitterActive = false;
     }
 }
+
+
 
 // Redraw only the gauge without triggering warning/jitter logic
 function redrawGaugeOnly() {
