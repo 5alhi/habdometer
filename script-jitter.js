@@ -1258,12 +1258,17 @@ window.addEventListener('resize', function() {
 });
 
 // Timed warning system
-// Timed warning system (from script-old.js)
-
 function showTimedWarning(warningElement, duration, interval) {
-    warningElement.style.display = 'flex';
+    // Show warning with fade in
+    warningElement.classList.remove('fade-out');
+    warningElement.classList.add('show');
+    
+    // Set timer to hide warning after duration
     warningTimer = setTimeout(() => {
-        warningElement.style.display = 'none';
+        warningElement.classList.remove('show');
+        warningElement.classList.add('fade-out');
+        
+        // Set interval timer to show warning again
         if (isWarningActive) {
             warningIntervalTimer = setTimeout(() => {
                 if (isWarningActive) {
