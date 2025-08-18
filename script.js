@@ -264,7 +264,12 @@ function updateGauge() {
     
     // Continuous animation for jitter effect when over threshold
     if (value > threshold) {
-        setTimeout(() => updateGauge(), 50); // 20 FPS for smooth jitter
+        if (!window.jitterAnimationActive) {
+            window.jitterAnimationActive = true;
+            startJitterAnimation();
+        }
+    } else {
+        window.jitterAnimationActive = false;
     }
 }
 
@@ -1272,5 +1277,112 @@ function showTimedWarning(warningElement, duration, interval) {
             }, interval - duration);
         }
     }, duration);
+}
+
+// Separate jitter animation that doesn't interfere with warnings
+function startJitterAnimation() {
+    function animateJitter() {
+        if (!window.jitterAnimationActive) return;
+        
+        const currentValue = parseFloat(document.getElementById('gaugeValue').value);
+        const threshold = parseFloat(document.getElementById('warningThreshold').value);
+        
+        if (currentValue <= threshold) {
+            window.jitterAnimationActive = false;
+            return;
+        }
+        
+        // Only redraw the gauge canvas without triggering warning logic
+        redrawGaugeOnly();
+        
+        setTimeout(animateJitter, 50); // 20 FPS
+    }
+    animateJitter();
+}
+
+// Redraw only the gauge without affecting warning system
+function redrawGaugeOnly() {
+    const canvas = document.getElementById('gaugeCanvas');
+    const ctx = canvas.getContext('2d');
+    const value = parseFloat(document.getElementById('gaugeValue').value);
+    const name = document.getElementById('gaugeName').value;
+    const type = document.getElementById('gaugeType').value;
+    const min = parseFloat(document.getElementById('minValue').value);
+    const max = parseFloat(document.getElementById('maxValue').value);
+    const units = document.getElementById('units').value;
+    
+    const percentage = Math.max(0, Math.min(1, (value - min) / (max - min)));
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+    
+    // Draw gauge based on type (jitter will be applied in needle functions)
+    switch(type) {
+        case 'angular':
+            drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'semicircle':
+            drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'quarter':
+            drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'linear':
+            drawLinearGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'speedometer':
+            drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+    }
+    
+    // Also update fullscreen if active
+    const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+    if (fullscreenOverlay.classList.contains('active')) {
+        redrawFullscreenGaugeOnly();
+    }
+}
+
+// Redraw fullscreen gauge without affecting warning system
+function redrawFullscreenGaugeOnly() {
+    const canvas = document.getElementById('fullscreenCanvas');
+    const ctx = canvas.getContext('2d');
+    const value = parseFloat(document.getElementById('gaugeValue').value);
+    const name = document.getElementById('gaugeName').value;
+    const type = document.getElementById('gaugeType').value;
+    const min = parseFloat(document.getElementById('minValue').value);
+    const max = parseFloat(document.getElementById('maxValue').value);
+    const units = document.getElementById('units').value;
+    
+    const percentage = Math.max(0, Math.min(1, (value - min) / (max - min)));
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+    
+    // Draw gauge based on type
+    switch(type) {
+        case 'angular':
+            drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'semicircle':
+            drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'quarter':
+            drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'linear':
+            drawLinearGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'speedometer':
+            drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+    }
 }
 
