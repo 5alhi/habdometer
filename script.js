@@ -283,21 +283,32 @@ function initializeApp() {
 }
 
 function startJitter() {
+
     if (!jitterActive) return;
     const gaugeValue = document.getElementById('gaugeValue');
     const originalValue = parseFloat(gaugeValue.value);
     const threshold = parseFloat(document.getElementById('warningThreshold').value);
     const maxValue = parseFloat(document.getElementById('maxValue').value);
-    if (originalValue > threshold) {
+
+    // If at or above max, allow needle to exceed max erratically
+    if (originalValue >= maxValue) {
+        // Jitter between max and max + 10% of max
+        const jitterAmount = Math.random() * (maxValue * 0.1);
+        const displayValue = Math.round(maxValue + jitterAmount);
+        redrawGaugeOnly(displayValue);
+        setTimeout(startJitter, 50);
+    } else if (originalValue > threshold) {
+        // Normal jitter between threshold and max
         const jitterAmount = (Math.random() - 0.5) * 2;
-        const displayValue = Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue));
-        redrawGaugeOnly(displayValue); // <-- Pass jittered value
+        const displayValue = Math.round(Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue)));
+        redrawGaugeOnly(displayValue);
         setTimeout(startJitter, 50);
     } else {
-        redrawGaugeOnly(originalValue);
+        redrawGaugeOnly(Math.round(originalValue));
         jitterActive = false;
     }
 }
+
 
 // Redraw only the gauge without triggering warning/jitter logic
 function redrawGaugeOnly(displayValue) {
