@@ -39,13 +39,13 @@
 
                     <div class="control-group">
                         <label for="gaugeValue">Gauge Value</label>
-                        <input type="number" id="gaugeValue" value="50" min="0" max="100">
-                        <input type="range" id="gaugeSlider" value="50" min="0" max="100">
+                        <input type="number" id="gaugeValue" value="50" min="0" max="120">
+                        <input type="range" id="gaugeSlider" value="50" min="0" max="120">
                     </div>
 
                     <div class="control-group">
                         <label for="gaugeName">Gauge Name</label>
-                        <input type="text" id="gaugeName" value="Habdometer" placeholder="Enter gauge name">
+                        <input type="text" id="gaugeName" value="هبدوميتر" placeholder="Enter gauge name">
                     </div>
                 </div>
 
@@ -60,12 +60,27 @@
 
                     <div class="control-group">
                         <label for="maxValue">Max Value</label>
-                        <input type="number" id="maxValue" value="100">
+                        <input type="number" id="maxValue" value="120">
                     </div>
 
                     <div class="control-group">
                         <label for="units">Units</label>
-                        <input type="text" id="units" value="%" placeholder="e.g., °C, %, RPM">
+                        <input type="text" id="units" value="°H" placeholder="e.g., °H, °C, %, RPM">
+                    </div>
+                </div>
+
+                <!-- Warning Settings -->
+                <div class="control-section">
+                    <h3 class="section-title">Warning Settings</h3>
+                    
+                    <div class="control-group">
+                        <label for="warningThreshold">Warning Threshold (%)</label>
+                        <input type="number" id="warningThreshold" value="100" min="50" max="120">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="warningText">Warning Message</label>
+                        <input type="text" id="warningText" value="WARNING: EXTREME HABDOLOGY DETECTED" placeholder="Enter warning message">
                     </div>
                 </div>
 
@@ -132,6 +147,13 @@
                 <div class="gauge-wrapper" id="gaugeWrapper">
                     <canvas id="gaugeCanvas" width="400" height="400"></canvas>
                     
+                    <!-- Warning Message Overlay -->
+                    <div class="warning-overlay" id="warningOverlay" style="display: none;">
+                        <div class="warning-message" id="warningMessage">
+                            WARNING: EXTREME HABDOLOGY DETECTED
+                        </div>
+                    </div>
+                    
                     <div class="resize-handles">
                         <div class="resize-handle resize-handle-nw"></div>
                         <div class="resize-handle resize-handle-ne"></div>
@@ -141,8 +163,8 @@
                 </div>
                 
                 <div class="gauge-info">
-                    <div class="current-value" id="currentValueDisplay">50%</div>
-                    <div class="gauge-title" id="gaugeTitleDisplay">Habdometer</div>
+                    <div class="current-value" id="currentValueDisplay">50°H</div>
+                    <div class="gauge-title" id="gaugeTitleDisplay">هبدوميتر</div>
                 </div>
             </div>
         </div>
@@ -152,9 +174,12 @@
     <div class="fullscreen-overlay" id="fullscreenOverlay">
         <div class="fullscreen-content">
             <canvas id="fullscreenCanvas" width="600" height="600"></canvas>
-            <div class="fullscreen-info">
-                <div class="fullscreen-value" id="fullscreenValueDisplay">50%</div>
-                <div class="fullscreen-title" id="fullscreenTitleDisplay">Habdometer</div>
+            
+            <!-- Fullscreen Warning Message -->
+            <div class="fullscreen-warning-overlay" id="fullscreenWarningOverlay" style="display: none;">
+                <div class="fullscreen-warning-message" id="fullscreenWarningMessage">
+                    WARNING: EXTREME HABDOLOGY DETECTED
+                </div>
             </div>
         </div>
         <button class="exit-fullscreen" id="exitFullscreenBtn">Exit Fullscreen</button>
