@@ -95,6 +95,13 @@ function initializeApp() {
     const backgroundColorText = document.getElementById('backgroundColorText');
     const warningThreshold = document.getElementById('warningThreshold');
     const warningText = document.getElementById('warningText');
+    const warningDuration = document.getElementById('warningDuration');
+    const warningInterval = document.getElementById('warningInterval');
+    
+    // Warning timer variables
+    let warningTimer = null;
+    let warningIntervalTimer = null;
+    let isWarningActive = false;
     
     // Event listeners for gauge updates
     gaugeValue.addEventListener('input', updateGauge);
@@ -109,6 +116,8 @@ function initializeApp() {
     units.addEventListener('input', updateGauge);
     warningThreshold.addEventListener('input', updateGauge);
     warningText.addEventListener('input', updateGauge);
+    warningDuration.addEventListener('input', updateGauge);
+    warningInterval.addEventListener('input', updateGauge);
     
     // Size control
     gaugeSize.addEventListener('input', function() {
@@ -224,15 +233,27 @@ function updateGauge() {
     document.getElementById('currentValueDisplay').textContent = value + units;
     document.getElementById('gaugeTitleDisplay').textContent = name;
     
-    // Check for warning condition
+    // Check for warning condition with timed display
     const warningOverlay = document.getElementById('warningOverlay');
     const warningMessage = document.getElementById('warningMessage');
+    const duration = parseInt(document.getElementById('warningDuration').value) * 1000; // Convert to milliseconds
+    const interval = parseInt(document.getElementById('warningInterval').value) * 1000; // Convert to milliseconds
     
     if (value > threshold) {
         warningMessage.textContent = warningMsg;
-        warningOverlay.style.display = 'flex';
+        
+        // Start warning cycle if not already active
+        if (!isWarningActive) {
+            isWarningActive = true;
+            showTimedWarning(warningOverlay, duration, interval);
+        }
     } else {
-        warningOverlay.style.display = 'none';
+        // Clear warning timers and hide warning
+        isWarningActive = false;
+        clearTimeout(warningTimer);
+        clearTimeout(warningIntervalTimer);
+        warningOverlay.classList.remove('show');
+        warningOverlay.classList.add('fade-out');
     }
     
     // Update fullscreen canvas if active
@@ -1064,15 +1085,27 @@ function updateFullscreenGauge() {
             break;
     }
     
-    // Check for warning condition in fullscreen
+    // Check for warning condition in fullscreen with timed display
     const fullscreenWarningOverlay = document.getElementById('fullscreenWarningOverlay');
     const fullscreenWarningMessage = document.getElementById('fullscreenWarningMessage');
+    const duration = parseInt(document.getElementById('warningDuration').value) * 1000;
+    const interval = parseInt(document.getElementById('warningInterval').value) * 1000;
     
     if (value > threshold) {
         fullscreenWarningMessage.textContent = warningMsg;
-        fullscreenWarningOverlay.style.display = 'flex';
+        
+        // Use the same warning cycle for fullscreen
+        if (!isWarningActive) {
+            isWarningActive = true;
+            showTimedWarning(fullscreenWarningOverlay, duration, interval);
+        }
     } else {
-        fullscreenWarningOverlay.style.display = 'none';
+        // Clear warning timers and hide warning
+        isWarningActive = false;
+        clearTimeout(warningTimer);
+        clearTimeout(warningIntervalTimer);
+        fullscreenWarningOverlay.classList.remove('show');
+        fullscreenWarningOverlay.classList.add('fade-out');
     }
 }
 
@@ -1187,4 +1220,26 @@ window.addEventListener('resize', function() {
         updateFullscreenGauge();
     }
 });
+
+// Timed warning system
+function showTimedWarning(warningElement, duration, interval) {
+    // Show warning with fade in
+    warningElement.classList.remove('fade-out');
+    warningElement.classList.add('show');
+    
+    // Set timer to hide warning after duration
+    warningTimer = setTimeout(() => {
+        warningElement.classList.remove('show');
+        warningElement.classList.add('fade-out');
+        
+        // Set interval timer to show warning again
+        if (isWarningActive) {
+            warningIntervalTimer = setTimeout(() => {
+                if (isWarningActive) {
+                    showTimedWarning(warningElement, duration, interval);
+                }
+            }, interval - duration);
+        }
+    }, duration);
+}
 
