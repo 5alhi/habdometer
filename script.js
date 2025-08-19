@@ -1200,7 +1200,7 @@ function showTimedWarning(warningElement, duration, interval) {
     warningTimer = setTimeout(() => {
         warningElement.classList.remove('show');
         warningElement.classList.add('fade-out');
-        warningElement.style.display = 'none';
+        warningElement.style.display = 'none'; // <-- This line ensures it hides in both regular and fullscreen
 
         // Set interval timer to show warning again
         if (isWarningActive) {
