@@ -1200,7 +1200,7 @@ function showTimedWarning(warningElement, duration, interval) {
     warningTimer = setTimeout(() => {
         warningElement.classList.remove('show');
         warningElement.classList.add('fade-out');
-        warningElement.style.display = 'none'; // <-- This line ensures it hides in both regular and fullscreen
+        warningElement.style.display = 'none';
 
         // Set interval timer to show warning again
         if (isWarningActive) {
@@ -1212,6 +1212,7 @@ function showTimedWarning(warningElement, duration, interval) {
         }
     }, duration);
 }
+
 
 
 // --- 4. In updateFullscreenGauge, allow percentage > 1 for jitter ---
