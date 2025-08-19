@@ -1191,15 +1191,18 @@ function exitFullscreen() {
 }
 
 function showTimedWarning(warningElement, duration, interval) {
+    // Show warning with fade in
     warningElement.style.display = 'flex';
     warningElement.classList.remove('fade-out');
     warningElement.classList.add('show');
 
+    // Set timer to hide warning after duration
     warningTimer = setTimeout(() => {
         warningElement.classList.remove('show');
         warningElement.classList.add('fade-out');
         warningElement.style.display = 'none';
 
+        // Set interval timer to show warning again
         if (isWarningActive) {
             warningIntervalTimer = setTimeout(() => {
                 if (isWarningActive) {
