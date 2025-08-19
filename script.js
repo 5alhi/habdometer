@@ -283,34 +283,34 @@ function initializeApp() {
 }
 
 function startJitter() {
-if (!jitterActive) return;
+    if (!jitterActive) return;
+
     const gaugeValue = document.getElementById('gaugeValue');
     const originalValue = parseFloat(gaugeValue.value);
     const threshold = parseFloat(document.getElementById('warningThreshold').value);
     const maxValue = parseFloat(document.getElementById('maxValue').value);
 
-// If at or above max, allow needle to exceed max erratically
+    let displayValue;
+
     if (originalValue >= maxValue) {
-        // Jitter between max and max + 20% of max
         const jitterAmount = Math.random() * (maxValue * 0.2);
-        const displayValue = Math.round(maxValue + jitterAmount);
-        redrawGaugeOnly(displayValue);
-        redrawFullscreenGaugeOnly(displayValue); // <-- Add this line
-        setTimeout(startJitter, 50);
+        displayValue = Math.round(maxValue + jitterAmount);
     } else if (originalValue > threshold) {
-        // Normal jitter between threshold and max
         const jitterAmount = (Math.random() - 0.5) * 2;
-        const displayValue = Math.round(Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue)));
-        redrawGaugeOnly(displayValue);
-        redrawFullscreenGaugeOnly(displayValue); // <-- Add this line
-        setTimeout(startJitter, 50);
+        displayValue = Math.round(Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue)));
     } else {
-        redrawGaugeOnly(Math.round(originalValue));
-        redrawFullscreenGaugeOnly(Math.round(originalValue)); // <-- Add this line
+        displayValue = Math.round(originalValue);
         jitterActive = false;
+    }
+
+    redrawGaugeOnly(displayValue);
+    redrawFullscreenGaugeOnly(displayValue);
+
+    if (jitterActive) {
+        setTimeout(startJitter, 50);
+    }
 }
 
-}
 
 
 // Add this helper function for fullscreen jitter redraw
@@ -325,12 +325,14 @@ function redrawFullscreenGaugeOnly(displayValue) {
     const min = parseFloat(document.getElementById('minValue').value);
     const max = parseFloat(document.getElementById('maxValue').value);
     const units = document.getElementById('units').value;
-    // Allow percentage to exceed 1 for jitter above max
-    const percentage = Math.max(0, (value - min) / (max - min));
+    const percentage = Math.max(0, (value - min) / (max - min)); // allow >1 for jitter
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = Math.min(centerX, centerY) - 40;
+
     switch (type) {
         case 'angular':
             drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
@@ -347,8 +349,10 @@ function redrawFullscreenGaugeOnly(displayValue) {
         case 'speedometer':
             drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
             break;
-     }
+    }
 }
+
+
 
 
 
@@ -1167,6 +1171,28 @@ function exitFullscreen() {
     overlay.classList.remove('active');
 }
 
+function showTimedWarning(warningElement, duration, interval) {
+    warningElement.style.display = 'flex';
+    warningElement.classList.remove('fade-out');
+    warningElement.classList.add('show');
+
+    warningTimer = setTimeout(() => {
+        warningElement.classList.remove('show');
+        warningElement.classList.add('fade-out');
+        warningElement.style.display = 'none';
+
+        if (isWarningActive) {
+            warningIntervalTimer = setTimeout(() => {
+                if (isWarningActive) {
+                    showTimedWarning(warningElement, duration, interval);
+                }
+            }, interval - duration);
+        }
+    }, duration);
+}
+
+
+// --- 4. In updateFullscreenGauge, allow percentage > 1 for jitter ---
 function updateFullscreenGauge() {
     const canvas = document.getElementById('fullscreenCanvas');
     const ctx = canvas.getContext('2d');
@@ -1178,27 +1204,25 @@ function updateFullscreenGauge() {
     const units = document.getElementById('units').value;
     const threshold = parseFloat(document.getElementById('warningThreshold').value);
     const warningMsg = document.getElementById('warningText').value;
-    
-    // Calculate optimal size for fullscreen (85% of screen)
+
     const screenSize = Math.min(window.innerWidth, window.innerHeight);
     const canvasSize = Math.round(screenSize * 0.85);
-    
+
     canvas.width = canvasSize;
     canvas.height = canvasSize;
     canvas.style.width = canvasSize + 'px';
     canvas.style.height = canvasSize + 'px';
-    
-    const percentage = Math.max(0, Math.min(1, (value - min) / (max - min)));
-    
-    // Clear canvas
+
+    // Allow percentage > 1 for jitter
+    const percentage = Math.max(0, (value - min) / (max - min));
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = Math.min(centerX, centerY) - 40;
-    
-    // Draw gauge based on type
-    switch(type) {
+
+    switch (type) {
         case 'angular':
             drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
             break;
@@ -1215,30 +1239,29 @@ function updateFullscreenGauge() {
             drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
             break;
     }
-    
-    // Check for warning condition in fullscreen with timed display
+
+    // Warning logic for fullscreen
     const fullscreenWarningOverlay = document.getElementById('fullscreenWarningOverlay');
     const fullscreenWarningMessage = document.getElementById('fullscreenWarningMessage');
     const duration = parseInt(document.getElementById('warningDuration').value) * 1000;
     const interval = parseInt(document.getElementById('warningInterval').value) * 1000;
-    
+
     if (value > threshold) {
         fullscreenWarningMessage.textContent = warningMsg;
-        
-        // Use the same warning cycle for fullscreen
         if (!isWarningActive) {
             isWarningActive = true;
             showTimedWarning(fullscreenWarningOverlay, duration, interval);
         }
     } else {
-        // Clear warning timers and hide warning
         isWarningActive = false;
         clearTimeout(warningTimer);
         clearTimeout(warningIntervalTimer);
         fullscreenWarningOverlay.classList.remove('show');
         fullscreenWarningOverlay.classList.add('fade-out');
+        fullscreenWarningOverlay.style.display = 'none';
     }
 }
+
 
 function generateUrl() {
     const baseUrl = window.location.origin + window.location.pathname;
