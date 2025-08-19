@@ -1384,5 +1384,15 @@ function redrawFullscreenGaugeOnly() {
             drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
             break;
     }
+
+    // Subtle gauge value display
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.round(canvas.height * 0.07)}px Inter, Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(value + units, centerX, centerY + radius * 0.7);
+    ctx.restore();
 }
 

@@ -9,12 +9,18 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-// Warning timer variables
+// Regular warning
 let warningTimer = null;
 let warningIntervalTimer = null;
 let isWarningActive = false;
-let jitterActive = false;
 
+// Fullscreen warning
+let fsWarningTimer = null;
+let fsWarningIntervalTimer = null;
+let isFSWarningActive = false;
+
+// Jitter
+let jitterActive = false;
 
 
 function parseQueryString() {
@@ -313,22 +319,48 @@ function startJitter() {
     const duration = parseInt(document.getElementById('warningDuration').value) * 1000;
     const interval = parseInt(document.getElementById('warningInterval').value) * 1000;
 
-    if (displayValue > threshold) {
-        fullscreenWarningMessage.textContent = warningMsg;
-        if (!fullscreenWarningOverlay.classList.contains('show')) {
-            showTimedWarning(fullscreenWarningOverlay, duration, interval);
-        }
-    } else {
-        fullscreenWarningOverlay.classList.remove('show');
-        fullscreenWarningOverlay.classList.add('fade-out');
-        fullscreenWarningOverlay.style.display = 'none';
+    // In startJitter() and updateFullscreenGauge()
+
+if (displayValue > threshold) {
+    fullscreenWarningMessage.textContent = warningMsg;
+    if (!isFSWarningActive) {
+        isFSWarningActive = true;
+        showTimedFSWarning(fullscreenWarningOverlay, duration, interval);
     }
+} else {
+    isFSWarningActive = false;
+    clearTimeout(fsWarningTimer);
+    clearTimeout(fsWarningIntervalTimer);
+    fullscreenWarningOverlay.classList.remove('show');
+    fullscreenWarningOverlay.classList.add('fade-out');
+    fullscreenWarningOverlay.style.display = 'none';
+}
+
 
     if (jitterActive) {
         setTimeout(startJitter, 50);
     }
 }
 
+function showTimedFSWarning(warningElement, duration, interval) {
+    warningElement.style.display = 'flex';
+    warningElement.classList.remove('fade-out');
+    warningElement.classList.add('show');
+
+    fsWarningTimer = setTimeout(() => {
+        warningElement.classList.remove('show');
+        warningElement.classList.add('fade-out');
+        warningElement.style.display = 'none';
+
+        if (isFSWarningActive) {
+            fsWarningIntervalTimer = setTimeout(() => {
+                if (isFSWarningActive) {
+                    showTimedFSWarning(warningElement, duration, interval);
+                }
+            }, interval - duration);
+        }
+    }, duration);
+}
 
 
 
