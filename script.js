@@ -306,10 +306,29 @@ function startJitter() {
     redrawGaugeOnly(displayValue);
     redrawFullscreenGaugeOnly(displayValue);
 
+    // Show warning in fullscreen during jitter
+    const fullscreenWarningOverlay = document.getElementById('fullscreenWarningOverlay');
+    const fullscreenWarningMessage = document.getElementById('fullscreenWarningMessage');
+    const warningMsg = document.getElementById('warningText').value;
+    const duration = parseInt(document.getElementById('warningDuration').value) * 1000;
+    const interval = parseInt(document.getElementById('warningInterval').value) * 1000;
+
+    if (displayValue > threshold) {
+        fullscreenWarningMessage.textContent = warningMsg;
+        if (!fullscreenWarningOverlay.classList.contains('show')) {
+            showTimedWarning(fullscreenWarningOverlay, duration, interval);
+        }
+    } else {
+        fullscreenWarningOverlay.classList.remove('show');
+        fullscreenWarningOverlay.classList.add('fade-out');
+        fullscreenWarningOverlay.style.display = 'none';
+    }
+
     if (jitterActive) {
         setTimeout(startJitter, 50);
     }
 }
+
 
 
 
