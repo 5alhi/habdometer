@@ -1,11 +1,20 @@
 // Habdometer - Professional Gauge Visualizer
 // Enhanced with bigger needle, center gauge name, Arabic fonts, and warning system
 
+let warningTimer = null;
+let warningIntervalTimer = null;
+let isWarningActive = false;
+
+// Fullscreen warning
+let fsWarningTimer = null;
+let fsWarningIntervalTimer = null;
+let isFSWarningActive = false;
+
+// Jitter
+let jitterActive = false;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Parse query string parameters on page load
     parseQueryString();
-    
-    // Initialize the application
     initializeApp();
 });
 
@@ -187,7 +196,7 @@ function initializeApp() {
 function updateGauge() {
     const canvas = document.getElementById('gaugeCanvas');
     const ctx = canvas.getContext('2d');
-    const value = parseFloat(document.getElementById('gaugeValue').value);
+    const value = Math.round(parseFloat(document.getElementById('gaugeValue').value));
     const name = document.getElementById('gaugeName').value;
     const type = document.getElementById('gaugeType').value;
     const min = parseFloat(document.getElementById('minValue').value);
@@ -195,22 +204,17 @@ function updateGauge() {
     const units = document.getElementById('units').value;
     const threshold = parseFloat(document.getElementById('warningThreshold').value);
     const warningMsg = document.getElementById('warningText').value;
-    
-    // Update slider and input max values
+
     document.getElementById('gaugeSlider').max = max;
     document.getElementById('gaugeValue').max = max;
-    
-    // Calculate percentage based on range
-    const percentage = Math.max(0, Math.min(1, (value - min) / (max - min)));
-    
-    // Clear canvas
+
+    const percentage = Math.max(0, (value - min) / (max - min));
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = Math.min(centerX, centerY) - 40;
-    
-    // Draw gauge based on type
+
     switch(type) {
         case 'angular':
             drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
@@ -228,48 +232,45 @@ function updateGauge() {
             drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
             break;
     }
-    
-    // Update display values
+
     document.getElementById('currentValueDisplay').textContent = value + units;
     document.getElementById('gaugeTitleDisplay').textContent = name;
-    
-    // Check for warning condition with timed display
+
+    // Warning logic
     const warningOverlay = document.getElementById('warningOverlay');
     const warningMessage = document.getElementById('warningMessage');
-    const duration = parseInt(document.getElementById('warningDuration').value) * 1000; // Convert to milliseconds
-    const interval = parseInt(document.getElementById('warningInterval').value) * 1000; // Convert to milliseconds
-    
+    const duration = parseInt(document.getElementById('warningDuration').value) * 1000;
+    const interval = parseInt(document.getElementById('warningInterval').value) * 1000;
+
     if (value > threshold) {
         warningMessage.textContent = warningMsg;
-        
-        // Start warning cycle if not already active
         if (!isWarningActive) {
             isWarningActive = true;
             showTimedWarning(warningOverlay, duration, interval);
         }
     } else {
-        // Clear warning timers and hide warning
         isWarningActive = false;
         clearTimeout(warningTimer);
         clearTimeout(warningIntervalTimer);
         warningOverlay.classList.remove('show');
         warningOverlay.classList.add('fade-out');
+        warningOverlay.style.display = 'none';
     }
-    
-    // Update fullscreen canvas if active
+
+    // Fullscreen logic
     const fullscreenOverlay = document.getElementById('fullscreenOverlay');
-    if (fullscreenOverlay.classList.contains('active')) {
+    if (fullscreenOverlay && fullscreenOverlay.classList.contains('active')) {
         updateFullscreenGauge();
     }
-    
-    // Continuous animation for jitter effect when over threshold
+
+    // Jitter logic
     if (value > threshold) {
-        if (!window.jitterAnimationActive) {
-            window.jitterAnimationActive = true;
-            startJitterAnimation();
+        if (!jitterActive) {
+            jitterActive = true;
+            startJitter();
         }
     } else {
-        window.jitterAnimationActive = false;
+        jitterActive = false;
     }
 }
 
@@ -343,6 +344,57 @@ function drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name
     // Draw gauge name in center
     drawCenterGaugeName(ctx, centerX, centerY, name, radius);
 }
+
+function startJitter() {
+    if (!jitterActive) return;
+    const gaugeValue = document.getElementById('gaugeValue');
+    const originalValue = parseFloat(gaugeValue.value);
+    const threshold = parseFloat(document.getElementById('warningThreshold').value);
+    const maxValue = parseFloat(document.getElementById('maxValue').value);
+
+    let displayValue;
+    if (originalValue >= maxValue) {
+        const jitterAmount = Math.random() * (maxValue * 0.2);
+        displayValue = Math.round(maxValue + jitterAmount);
+    } else if (originalValue > threshold) {
+        const jitterAmount = (Math.random() - 0.5) * 2;
+        displayValue = Math.round(Math.max(threshold, Math.min(originalValue + jitterAmount, maxValue)));
+    } else {
+        displayValue = Math.round(originalValue);
+        jitterActive = false;
+    }
+
+    redrawGaugeOnly(displayValue);
+    redrawFullscreenGaugeOnly(displayValue);
+
+    // Fullscreen warning logic (independent)
+    const fullscreenWarningOverlay = document.getElementById('fullscreenWarningOverlay');
+    const fullscreenWarningMessage = document.getElementById('fullscreenWarningMessage');
+    const warningMsg = document.getElementById('warningText').value;
+    const duration = parseInt(document.getElementById('warningDuration').value) * 1000;
+    const interval = parseInt(document.getElementById('warningInterval').value) * 1000;
+
+    if (displayValue > threshold) {
+        fullscreenWarningMessage.textContent = warningMsg;
+        if (!isFSWarningActive) {
+            isFSWarningActive = true;
+            showTimedFSWarning(fullscreenWarningOverlay, duration, interval);
+        }
+    } else {
+        isFSWarningActive = false;
+        clearTimeout(fsWarningTimer);
+        clearTimeout(fsWarningIntervalTimer);
+        fullscreenWarningOverlay.classList.remove('show');
+        fullscreenWarningOverlay.classList.add('fade-out');
+        fullscreenWarningOverlay.style.display = 'none';
+    }
+
+    if (jitterActive) {
+        setTimeout(startJitter, 50);
+    }
+}
+
+
 
 function drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units) {
     // Speedometer spans 270 degrees
@@ -1259,16 +1311,13 @@ window.addEventListener('resize', function() {
 
 // Timed warning system
 function showTimedWarning(warningElement, duration, interval) {
-    // Show warning with fade in
+    warningElement.style.display = 'flex';
     warningElement.classList.remove('fade-out');
     warningElement.classList.add('show');
-    
-    // Set timer to hide warning after duration
     warningTimer = setTimeout(() => {
         warningElement.classList.remove('show');
         warningElement.classList.add('fade-out');
-        
-        // Set interval timer to show warning again
+        warningElement.style.display = 'none';
         if (isWarningActive) {
             warningIntervalTimer = setTimeout(() => {
                 if (isWarningActive) {
@@ -1278,6 +1327,26 @@ function showTimedWarning(warningElement, duration, interval) {
         }
     }, duration);
 }
+
+function showTimedFSWarning(warningElement, duration, interval) {
+    warningElement.style.display = 'flex';
+    warningElement.classList.remove('fade-out');
+    warningElement.classList.add('show');
+    fsWarningTimer = setTimeout(() => {
+        warningElement.classList.remove('show');
+        warningElement.classList.add('fade-out');
+        warningElement.style.display = 'none';
+        if (isFSWarningActive) {
+            fsWarningIntervalTimer = setTimeout(() => {
+                if (isFSWarningActive) {
+                    showTimedFSWarning(warningElement, duration, interval);
+                }
+            }, interval - duration);
+        }
+    }, duration);
+}
+
+
 
 // Separate jitter animation that doesn't interfere with warnings
 function startJitterAnimation() {
@@ -1346,6 +1415,43 @@ function redrawGaugeOnly() {
     }
 }
 
+function redrawGaugeOnly(displayValue) {
+    const canvas = document.getElementById('gaugeCanvas');
+    const ctx = canvas.getContext('2d');
+    const value = Math.round(displayValue !== undefined ? displayValue : parseFloat(document.getElementById('gaugeValue').value));
+    const name = document.getElementById('gaugeName').value;
+    const type = document.getElementById('gaugeType').value;
+    const min = parseFloat(document.getElementById('minValue').value);
+    const max = parseFloat(document.getElementById('maxValue').value);
+    const units = document.getElementById('units').value;
+    const percentage = Math.max(0, (value - min) / (max - min));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+    switch(type) {
+        case 'angular':
+            drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'semicircle':
+            drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'quarter':
+            drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'linear':
+            drawLinearGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'speedometer':
+            drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+    }
+    const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+    if (fullscreenOverlay && fullscreenOverlay.classList.contains('active')) {
+        redrawFullscreenGaugeOnly(value);
+    }
+}
+
 // Redraw fullscreen gauge without affecting warning system
 function redrawFullscreenGaugeOnly() {
     const canvas = document.getElementById('fullscreenCanvas');
@@ -1396,3 +1502,45 @@ function redrawFullscreenGaugeOnly() {
     ctx.restore();
 }
 
+function redrawFullscreenGaugeOnly(displayValue) {
+    const canvas = document.getElementById('fullscreenCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const value = Math.round(displayValue !== undefined ? displayValue : parseFloat(document.getElementById('gaugeValue').value));
+    const name = document.getElementById('gaugeName').value;
+    const type = document.getElementById('gaugeType').value;
+    const min = parseFloat(document.getElementById('minValue').value);
+    const max = parseFloat(document.getElementById('maxValue').value);
+    const units = document.getElementById('units').value;
+    const percentage = Math.max(0, (value - min) / (max - min));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+    switch(type) {
+        case 'angular':
+            drawAngularGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'semicircle':
+            drawSemicircleGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'quarter':
+            drawQuarterGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'linear':
+            drawLinearGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+        case 'speedometer':
+            drawSpeedometerGauge(ctx, centerX, centerY, radius, percentage, value, name, units);
+            break;
+    }
+    // Subtle gauge value display
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.round(canvas.height * 0.07)}px Inter, Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(value + units, centerX, centerY + radius * 0.7);
+    ctx.restore();
+}
